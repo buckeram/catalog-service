@@ -20,19 +20,25 @@ public class BookJsonTests {
     @Test
     void testSerialize() throws IOException {
         var now = Instant.now();
-        var book = new Book(123L, "1234567890", "Title", "Author", 9.90, now, now, 1);
-        var jsonContext = json.write(book);
-        assertThat(jsonContext).extractingJsonPathNumberValue("@.id")
+        var book = new Book(123L, "1234567890", "Title", "Author", 9.90, "Polarsophia", now, now, 1);
+        var jsonContent = json.write(book);
+        assertThat(jsonContent).extractingJsonPathNumberValue("@.id")
                 .isEqualTo(book.id().intValue());
-        assertThat(jsonContext).extractingJsonPathStringValue("@.isbn")
+        assertThat(jsonContent).extractingJsonPathStringValue("@.isbn")
                 .isEqualTo(book.isbn());
-        assertThat(jsonContext).extractingJsonPathStringValue("@.title")
+        assertThat(jsonContent).extractingJsonPathStringValue("@.title")
                 .isEqualTo(book.title());
-        assertThat(jsonContext).extractingJsonPathStringValue("@.author")
+        assertThat(jsonContent).extractingJsonPathStringValue("@.author")
                 .isEqualTo(book.author());
-        assertThat(jsonContext).extractingJsonPathNumberValue("@.price")
+        assertThat(jsonContent).extractingJsonPathNumberValue("@.price")
                 .isEqualTo(book.price());
-        assertThat(jsonContext).extractingJsonPathNumberValue("@.version")
+        assertThat(jsonContent).extractingJsonPathStringValue("@.publisher")
+                .isEqualTo(book.publisher());
+        assertThat(jsonContent).extractingJsonPathStringValue("@.createdDate")
+                .isEqualTo(book.createdDate().toString());
+        assertThat(jsonContent).extractingJsonPathStringValue("@.lastModifiedDate")
+                .isEqualTo(book.lastModifiedDate().toString());
+        assertThat(jsonContent).extractingJsonPathNumberValue("@.version")
                 .isEqualTo(book.version());
     }
 
@@ -46,6 +52,7 @@ public class BookJsonTests {
                     "title": "Title",
                     "author": "Author",
                     "price": 9.90,
+                    "publisher": "Polarsophia",
                     "createdDate": "2021-09-07T22:50:37.135029Z",
                     "lastModifiedDate": "2021-09-07T22:50:37.135029Z",
                     "version": 111
@@ -53,6 +60,7 @@ public class BookJsonTests {
                 """;
         assertThat(json.parse(content))
                 .usingRecursiveComparison()
-                .isEqualTo(new Book(102030405L, "1234567890", "Title", "Author", 9.90, instant, instant,111));
+                .isEqualTo(new Book(102030405L, "1234567890", "Title", "Author",
+                        9.90, "Polarsophia", instant, instant,111));
     }
 }
