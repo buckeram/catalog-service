@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,8 +19,11 @@ public class BookJsonTests {
 
     @Test
     void testSerialize() throws IOException {
-        var book = new Book("1234567890", "Title", "Author", 9.90);
+        var now = Instant.now();
+        var book = new Book(123L, "1234567890", "Title", "Author", 9.90, now, now, 1);
         var jsonContext = json.write(book);
+        assertThat(jsonContext).extractingJsonPathNumberValue("@.id")
+                .isEqualTo(book.id().intValue());
         assertThat(jsonContext).extractingJsonPathStringValue("@.isbn")
                 .isEqualTo(book.isbn());
         assertThat(jsonContext).extractingJsonPathStringValue("@.title")
@@ -28,20 +32,27 @@ public class BookJsonTests {
                 .isEqualTo(book.author());
         assertThat(jsonContext).extractingJsonPathNumberValue("@.price")
                 .isEqualTo(book.price());
+        assertThat(jsonContext).extractingJsonPathNumberValue("@.version")
+                .isEqualTo(book.version());
     }
 
     @Test
     void testDeserialize() throws IOException {
+        var instant = Instant.parse("2021-09-07T22:50:37.135029Z");
         var content = """
                 {
+                    "id": 102030405,
                     "isbn": "1234567890",
                     "title": "Title",
                     "author": "Author",
-                    "price": 9.90
+                    "price": 9.90,
+                    "createdDate": "2021-09-07T22:50:37.135029Z",
+                    "lastModifiedDate": "2021-09-07T22:50:37.135029Z",
+                    "version": 111
                 }
                 """;
         assertThat(json.parse(content))
                 .usingRecursiveComparison()
-                .isEqualTo(new Book("1234567890", "Title", "Author", 9.90));
+                .isEqualTo(new Book(102030405L, "1234567890", "Title", "Author", 9.90, instant, instant,111));
     }
 }
